@@ -1,0 +1,7 @@
+<div class="card">
+<h2>Downloads</h2>
+<p><a class="btn" href="{{ url_for('zip_job', job_id=job) }}">Download everything (.zip)</a></p>
+<table>
+{% for f in d.file_info %}<tr><td><a href="{{ url_for('files', job_id=job, name=f.name) }}" download>{{ f.name }}</a></td><td class="mut">{{ f.desc }}</td></tr>{% endfor %}
+</table>
+</div>

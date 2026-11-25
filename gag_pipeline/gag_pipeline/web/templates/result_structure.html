@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}{{ d.pdb_id }} – GAG–protein analysis{% endblock %}
+{% block body %}
+{% set v = d.view %}
+<div class="card">
+<h1>{{ d.pdb_id }}{% if v.protein_name %} <span class="mut">– {{ v.protein_name }}</span>{% endif %}</h1>
+<p class="mut" style="margin-bottom:4px">Cutoff {{ d.cutoff }} Å</p>
+<p style="margin:2px 0"><b>GAG found:</b> {% if v.gag_list %}{{ v.n_gag }} sugar residue(s){% else %}none{% endif %}</p>
+{% for line in v.gag_list %}<div class="mut" style="font-size:13px">{{ line }}</div>{% endfor %}
+<p style="margin:8px 0 0"><b>{{ v.n_contact_residues }}</b> protein residues touch the GAG <span class="mut">({{ v.n_contacts }} residue–sugar pairs, listed at the bottom)</span></p>
+{% for n in d.notes %}<div class="note">{{ n }}</div>{% endfor %}
+</div>
+
+<div class="grid" style="align-items:start">
+<div class="card" style="position:sticky;top:8px">
+<div id="viewer" aria-label="3-D structure viewer"></div>
+{% if v.unit %}
+<p class="mut" style="font-size:13px;margin:10px 0 4px">Showing one functional unit: protein chain <b>{{ v.unit.protein_chain }}</b> with GAG chain <b>{{ v.unit.gag_chain }}</b>{% if v.unit.n_other_chains %} ({{ v.unit.n_other_chains }} other chain(s) in the file are copies or neighbours and are hidden){% endif %}.</p>
+<p style="margin:4px 0">
+<label><input type="radio" name="vmode" id="m_unit" checked> Functional unit</label> &nbsp;
+<label><input type="radio" name="vmode" id="m_site"> Interaction only</label> &nbsp;
+<label><input type="radio" name="vmode" id="m_all"> All chains</label>
+</p>
+{% endif %}
+<p style="margin:6px 0 0">
+<label><input type="checkbox" id="t_gag" checked> <span class="sw" style="background:var(--gag)"></span>GAG</label> &nbsp;
+<label><input type="checkbox" id="t_contact" checked> <span class="sw" style="background:var(--contact)"></span>Interacting residues</label> &nbsp;
+<label><input type="checkbox" id="t_motif" checked> <span class="sw" style="background:var(--motif)"></span>Motif residues</label> &nbsp;
+<label><input type="checkbox" id="t_label" checked> Labels</label>
+</p>
+<p style="margin:8px 0 0">
+<button class="sec" id="b_reset" type="button">Reset view</button>
+<a class="btn sec" href="{{ url_for('files', job_id=job, name=v.structure_file) }}" download>Structure file</a>
+{% if v.interaction_file %}<a class="btn" href="{{ url_for('files', job_id=job, name=v.interaction_file) }}" download>Interaction PDB (GAG + touching residues)</a>{% endif %}
+</p>
+<p class="mut" id="viewer_msg" style="font-size:13px"></p>
+</div>
+
+<div>
+<div class="card">
+<h2>Motifs found</h2>
+<p class="mut" style="font-size:13px;margin-top:0">Click one to highlight it in 3-D. Cyan in the viewer and sequence = motifs found from the sequence alone. CPC and Margalit are built from the residues that already touch the GAG, and clamp is found from coordinates, so these three are shown only when clicked.</p>
+<div style="max-height:380px;overflow-y:auto">
+{% for g in v.groups %}
+<details {% if g['items'] %}open{% endif %}><summary>{{ g.title }} ({{ g['items']|length }})</summary>
+{% for it in g['items'][:60] %}<button type="button" class="chip" data-sel="{{ it.sel }}">{{ it.label }}</button>{% endfor %}
+{% if g['items']|length > 60 %}<span class="mut">… {{ g['items']|length - 60 }} more in the motif report</span>{% endif %}
+</details>
+{% endfor %}
+</div>
+</div>
+<div class="card">
+<h2>Do the motifs predict the binding site?</h2>
+<p class="mut" style="font-size:13px;margin-top:0">Cardin–Weintraub, clusters, turn and vWF patterns (found without looking at the GAG) compared with the residues that really touch it.</p>
+<table>
+<tr><td>Residues flagged by a motif</td><td>{{ v.stats.predicted }}</td></tr>
+<tr><td>Residues that touch the GAG</td><td>{{ v.stats.observed }}</td></tr>
+<tr><td>In both</td><td>{{ v.stats.overlap }}</td></tr>
+<tr><td>Precision <span class="mut">(of flagged, how many touch)</span></td><td>{{ '%.0f'|format(v.stats.precision*100) }}%</td></tr>
+<tr><td>Recall <span class="mut">(of touching, how many flagged)</span></td><td>{{ '%.0f'|format(v.stats.recall*100) }}%</td></tr>
+</table>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Sequence</h2>
+<p class="mut" style="font-size:13px"><span class="sw" style="background:var(--contact)"></span>contacts the GAG &nbsp;
+<span class="sw" style="background:var(--motif)"></span>inside a motif &nbsp; split colour = both. Click a residue to zoom to it. “⋯ gap” = residues missing from the structure.{% if v.unit %} Only the protein chain of the functional unit is shown; other chains are copies of the same protein.{% endif %}</p>
+{% for c in v.chains if c.in_unit or not v.unit %}
+<h3 style="font-size:14px;margin:14px 0 2px">Chain {{ c.chain }} <span class="mut">· residues {{ c.first }}–{{ c.last }} ({{ c.length }} modelled)</span></h3>
+<div class="mut" style="font-size:13px">Contacting: {{ c.contact_ranges or 'none' }} &nbsp;·&nbsp; In a motif: {{ c.motif_ranges or 'none' }}</div>
+<div class="seqrow">
+{% for b in c.blocks %}
+ {% if b.gap %}<span class="gap">⋯ gap {{ b.gap }}</span>
+ {% else %}
+  {% for i in range(0, b.residues|length, 10) %}
+  <span class="blk"><span class="n">{{ b.residues[i].num }}</span><span class="r">{% for r in b.residues[i:i+10] %}<span class="res {{ r.cls }}" data-chain="{{ c.chain }}" data-num="{{ r.num }}" title="{{ r.name }} {{ r.num }}">{{ r.aa }}</span>{% endfor %}</span></span>
+  {% endfor %}
+ {% endif %}
+{% endfor %}
+</div>
+{% endfor %}
+</div>
+
+{% if v.contacts %}
+<div class="card">
+<h2>Interacting residues <span class="mut" style="font-weight:400">(one row per residue–sugar pair)</span></h2>
+<table><tr><th>Chain</th><th>Protein residue</th><th>GAG residue</th><th>Closest distance (Å)</th></tr>
+{% for c in v.contacts %}<tr><td>{{ c.chain }}</td><td>{{ c.res }}</td><td>{{ c.gag }}</td><td>{{ c.dist }}</td></tr>{% endfor %}
+</table></div>
+{% endif %}
+
+{% include "_downloads.html" %}
+
+<script src="{{ url_for('static', filename='jsmol/JSmol.min.js') }}"></script>
+<script>
+var SEL = {gag: {{ v.sel_gag|tojson }}, contact: {{ v.sel_contact|tojson }}, motif: {{ v.sel_motif|tojson }}};
+var UNIT = {{ v.unit|tojson }};
+if (UNIT) { SEL = {gag: UNIT.sel_gag, contact: UNIT.sel_contact, motif: UNIT.sel_motif}; }
+var FILE = {{ url_for('files', job_id=job, name=v.structure_file)|tojson }};
+var APP = null;
+function runJ(s){ if(APP) Jmol.script(APP, s); }
+function mode(){
+  if (!UNIT) return 'all';
+  return document.getElementById('m_all').checked ? 'all' : document.getElementById('m_site').checked ? 'site' : 'unit';
+}
+function displayScript(){
+  var m = mode();
+  if (m === 'all') return "display all;";
+  if (m === 'site') return "display (" + [SEL.gag, SEL.contact].filter(Boolean).join(" or ") + ");";
+  return "display " + UNIT.chain_sel + ";";
+}
+function styleScript(){
+  var s = "select all; cartoons only; color cartoons translucent 0.55 [xBFC5CC]; label off;";
+  if (document.getElementById('t_motif').checked && SEL.motif) s += "select "+SEL.motif+"; color cartoons [x06B6D4];";
+  if (document.getElementById('t_contact').checked && SEL.contact) {
+    s += "select "+SEL.contact+"; wireframe 0.25; color cpk;";
+    if (UNIT) UNIT.residue_colors.forEach(function(r){ if(r.sel) s += "select "+r.sel+" and carbon; color [x"+r.hex+"];"; });
+    else s += "select "+SEL.contact+" and carbon; color [xF59E0B];";
+  }
+  if (document.getElementById('t_gag').checked && SEL.gag) s += "select "+SEL.gag+"; wireframe 0.15; cpk 0.35; color cpk; select "+SEL.gag+" and carbon; color [xD946EF];";
+  if (document.getElementById('t_label').checked && UNIT) {
+    s += "set labelfront true; set labelOffset 6 6; font label 14 sansserif bold;";
+    if (UNIT.contact_label_sel && document.getElementById('t_contact').checked) s += "select "+UNIT.contact_label_sel+"; label %[group]%[resno]; color label [x000000]; background label [xFFFFFF];";
+    if (UNIT.gag_label_sel && document.getElementById('t_gag').checked) s += "select "+UNIT.gag_label_sel+"; label %[group]%[resno]:%[chain]; color label [x7E22CE]; background label [xFFFFFF];";
+  }
+  return s + displayScript() + "select none;";
+}
+function frameScript(){
+  var m = mode(), site = [SEL.gag, SEL.contact].filter(Boolean).join(" or ");
+  if (m === 'unit' && site) return "zoomTo 0 {within(7.0, ("+site+"))} 0;";
+  if (m !== 'all' && site) return "zoomTo 0 {"+site+"} 0;";
+  return "zoomTo 0 {all} 0;";
+}
+function focusSel(sel){
+  if(!sel) return;
+  runJ(styleScript()+"select "+sel+"; color [xFACC15]; zoomTo 0.6 {"+sel+"} 0; select none;");
+}
+function ready(){
+  document.getElementById('viewer_msg').textContent = "";
+}
+var Info = {width: 100, height: 560, use: "HTML5", j2sPath: {{ url_for('static', filename='jsmol/j2s')|tojson }},
+  disableJ2SLoadMonitor: true, disableInitialConsole: true, addSelectionOptions: false,
+  color: "#ffffff", debug: false,
+  script: 'load "'+FILE+'" 1; set antialiasDisplay true; ' + styleScript() + frameScript(),
+  readyFunction: ready};
+document.addEventListener('DOMContentLoaded', function(){
+  var box = document.getElementById('viewer');
+  Info.width = box.clientWidth || 700;
+  APP = Jmol.getApplet("jmolApplet0", Info);
+  box.innerHTML = Jmol.getAppletHtml(APP);
+});
+['t_gag','t_contact','t_motif','t_label'].forEach(function(id){
+  document.getElementById(id).addEventListener('change', function(){ runJ(styleScript()); });
+});
+['m_unit','m_site','m_all'].forEach(function(id){
+  var e = document.getElementById(id);
+  if (e) e.addEventListener('change', function(){ runJ(styleScript()+frameScript()); });
+});
+document.getElementById('b_reset').addEventListener('click', function(){ runJ(styleScript()+frameScript()); });
+document.querySelectorAll('.chip').forEach(function(b){ b.addEventListener('click', function(){ focusSel(b.dataset.sel); }); });
+document.querySelectorAll('.seqrow .res').forEach(function(r){
+  r.addEventListener('click', function(){ focusSel("("+r.dataset.num+":"+r.dataset.chain+" and protein)"); });
+});
+</script>
+{% endblock %}

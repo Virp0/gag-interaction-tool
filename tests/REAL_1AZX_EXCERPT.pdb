@@ -1,0 +1,61 @@
+HEADER    SERINE PROTEASE INHIBITOR               23-NOV-97   TEST              
+TITLE     TRIMMED REAL EXCERPT OF 1AZX FOR REGRESSION TESTING
+HET    Z9L  A   1      25
+HET    Z9K  A   2      17
+HET    GU6  A   3      23
+HET    GU1  A   4      14
+HET    Z9H  A   5      21
+HET    NAG  I 501      14
+HETNAM     Z9L METHYL 2,3,6-TRI-O-SULFO-ALPHA-D-GLUCOPYRANOSIDE
+HETNAM     Z9K 3-O-METHYL-2-O-SULFO-ALPHA-L-IDOPYRANURONIC ACID
+HETNAM     GU6 2,3,6-TRI-O-SULFO-ALPHA-D-GLUCOPYRANOSE
+HETNAM     GU1 2,3-DI-O-METHYL-BETA-D-GLUCOPYRANURONIC ACID
+HETNAM     Z9H 3,4-DI-O-METHYL-2,6-DI-O-SULFO-ALPHA-D-GLUCOPYRANOSE
+HETNAM     NAG 2-ACETAMIDO-2-DEOXY-BETA-D-GLUCOPYRANOSE
+LINK         ND2 ASN I 155                 C1  NAG I 501     1555   1555  1.43
+LINK         O4  Z9L A   1                 C1  Z9K A   2     1555   1555  1.42
+LINK         O4  Z9K A   2                 C1  GU6 A   3     1555   1555  1.44
+LINK         O4  GU6 A   3                 C1  GU1 A   4     1555   1555  1.42
+LINK         O4  GU1 A   4                 C1  Z9H A   5     1555   1555  1.43
+ATOM      1 N    LYS I  11       0.000   0.000   0.000  1.00 20.00           N
+ATOM      2 CA   LYS I  11       1.000   0.000   0.000  1.00 20.00           C
+ATOM      3 C    LYS I  11       2.000   0.500   0.000  1.00 20.00           C
+ATOM      4 O    LYS I  11       2.000   1.700   0.000  1.00 20.00           O
+ATOM      5 CB   LYS I  11       1.000  -1.200   0.000  1.00 20.00           C
+ATOM      6 N    ARG I  13       3.000   0.000   0.000  1.00 20.00           N
+ATOM      7 CA   ARG I  13       4.000   0.000   0.000  1.00 20.00           C
+ATOM      8 C    ARG I  13       5.000   0.500   0.000  1.00 20.00           C
+ATOM      9 O    ARG I  13       5.000   1.700   0.000  1.00 20.00           O
+ATOM     10 CB   ARG I  13       4.000  -1.200   0.000  1.00 20.00           C
+ATOM     11 N    ARG I  46       6.000   0.000   0.000  1.00 20.00           N
+ATOM     12 CA   ARG I  46       7.000   0.000   0.000  1.00 20.00           C
+ATOM     13 C    ARG I  46       8.000   0.500   0.000  1.00 20.00           C
+ATOM     14 O    ARG I  46       8.000   1.700   0.000  1.00 20.00           O
+ATOM     15 CB   ARG I  46       7.000  -1.200   0.000  1.00 20.00           C
+ATOM     16 N    ARG I  47       9.000   0.000   0.000  1.00 20.00           N
+ATOM     17 CA   ARG I  47      10.000   0.000   0.000  1.00 20.00           C
+ATOM     18 C    ARG I  47      11.000   0.500   0.000  1.00 20.00           C
+ATOM     19 O    ARG I  47      11.000   1.700   0.000  1.00 20.00           O
+ATOM     20 CB   ARG I  47      10.000  -1.200   0.000  1.00 20.00           C
+ATOM     21 N    ASN I 155     100.000 100.000 100.000  1.00 20.00           N
+ATOM     22 CA   ASN I 155     101.000 100.000 100.000  1.00 20.00           C
+ATOM     23 C    ASN I 155     102.000 100.500 100.000  1.00 20.00           C
+ATOM     24 O    ASN I 155     102.000 101.700 100.000  1.00 20.00           O
+ATOM     25 CB   ASN I 155     101.000  98.800 100.000  1.00 20.00           C
+ATOM     26 CG   ASN I 155     102.000  98.500 100.300  1.00 20.00           C
+ATOM     27 OD1  ASN I 155     102.300  98.800 101.500  1.00 20.00           O
+ATOM     28 ND2  ASN I 155     102.200  97.200 100.000  1.00 20.00           N
+TER      29      ASN I 155
+HETATM   30 C1   Z9L A   1       0.500   0.300   0.000  1.00 25.00           C
+HETATM   31 O1S  Z9L A   1       0.800   1.000   0.500  1.00 25.00           O
+HETATM   32 C1   Z9K A   2       3.500   0.300   0.000  1.00 25.00           C
+HETATM   33 O1S  Z9K A   2       3.800   1.000   0.500  1.00 25.00           O
+HETATM   34 C1   GU6 A   3       6.500   0.300   0.000  1.00 25.00           C
+HETATM   35 O1S  GU6 A   3       6.800   1.000   0.500  1.00 25.00           O
+HETATM   36 C1   GU1 A   4       9.500   0.300   0.000  1.00 25.00           C
+HETATM   37 O1   GU1 A   4       9.800   1.000   0.500  1.00 25.00           O
+HETATM   38 C1   Z9H A   5      12.500   0.300   0.000  1.00 25.00           C
+HETATM   39 O1S  Z9H A   5      12.800   1.000   0.500  1.00 25.00           O
+HETATM   40 C1   NAG I 501     102.200  97.200 100.000  1.00 30.00           C
+HETATM   41 C2   NAG I 501     103.000  97.500 100.300  1.00 30.00           C
+END

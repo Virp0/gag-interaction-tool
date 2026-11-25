@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Alignment – GAG–protein analysis{% endblock %}
+{% block body %}
+<div class="card">
+<h1>Alignment and consensus</h1>
+<p class="mut">{{ d.msa.aligned|length }} sequences · {{ d.msa.rows|length }} columns · {% if d.msa.already_aligned %}alignment supplied{% else %}aligned here (center-star){% endif %}</p>
+<p><b>Consensus</b> (x = no residue in ≥ 50% of sequences)</p>
+<p style="font-family:ui-monospace,Consolas,monospace;word-break:break-all">{{ d.msa.consensus }}</p>
+</div>
+<div class="card"><h2>Sequence logo</h2>
+<div style="overflow-x:auto"><img alt="Sequence logo" style="max-width:none" src="{{ url_for('files', job_id=job, name='alignment_logo.svg') }}"></div>
+</div>
+<div class="card"><h2>Columns with ≥ 50% Lys/Arg ({{ d.kr_rows|length }})</h2>
+<table><tr><th>Column</th><th>Position in first sequence</th><th>Consensus</th><th>Conservation</th><th>K/R fraction</th></tr>
+{% for r in d.kr_rows %}<tr><td>{{ r.column }}</td><td>{{ r.ref_position }}</td><td>{{ r.consensus }}</td><td>{{ r.conservation }}</td><td>{{ r.KR_fraction }}</td></tr>{% else %}<tr><td colspan="5" class="mut">None.</td></tr>{% endfor %}
+</table></div>
+{% for s in d.per_seq %}
+<div class="card"><h2>{{ s.name }} – motif scan</h2>
+<p class="mut">Residues in a motif or cluster: {{ s.ranges or 'none' }}</p>
+{% for it in s['items'] %}<div class="mut" style="font-family:ui-monospace,Consolas,monospace;font-size:13px">{{ it.label }}</div>{% endfor %}
+</div>
+{% endfor %}
+{% include "_downloads.html" %}
+{% endblock %}

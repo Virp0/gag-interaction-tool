@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="card">
+<h1>Analyze a protein</h1>
+<p class="mut">Enter a PDB ID, upload a PDB file, or paste a sequence. Several sequences in FASTA give an alignment, consensus and logo.</p>
+{% if error %}<p class="err" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="{{ url_for('analyze') }}" enctype="multipart/form-data">
+<div class="tabs">
+<label><input type="radio" name="mode" value="pdb_id" {% if form.get('mode','pdb_id')=='pdb_id' %}checked{% endif %}><span>PDB ID</span></label>
+<label><input type="radio" name="mode" value="upload" {% if form.get('mode')=='upload' %}checked{% endif %}><span>Upload PDB file</span></label>
+<label><input type="radio" name="mode" value="compare" {% if form.get('mode')=='compare' %}checked{% endif %}><span>Compare structures</span></label>
+<label><input type="radio" name="mode" value="sequence" {% if form.get('mode')=='sequence' %}checked{% endif %}><span>Sequence(s)</span></label>
+</div>
+<div data-for="pdb_id"><label>PDB ID<br><input type="text" name="pdb_id" maxlength="4" placeholder="e.g. 1AZX" value="{{ form.get('pdb_id','') }}"></label></div>
+<div data-for="upload"><label>PDB file<br><input type="file" name="pdb_file" accept=".pdb,.ent"></label></div>
+<div data-for="compare"><label>2 to 8 PDB IDs<br><input type="text" name="pdb_ids" placeholder="e.g. 1AZX 1SR5 1FQ9" value="{{ form.get('pdb_ids','') }}"></label>
+<p class="mut" style="font-size:13px">Finds which residues recur across structures. The same protein is matched across entries by its UniProt number, so different chain letters or numbering don't matter.</p></div>
+<div data-for="sequence"><label>Protein sequence or FASTA<br><textarea name="sequence" placeholder=">my_protein&#10;MKRKAAGLLK...">{{ form.get('sequence','') }}</textarea></label></div>
+<p data-for="pdb_id upload compare"><label>Distance cutoff (Å)<br>
+<select name="cutoff">{% for c in ['3.2','3.3','3.4','3.5'] %}<option value="{{c}}" {% if form.get('cutoff','3.5')==c %}selected{% endif %}>{{c}}</option>{% endfor %}</select></label></p>
+<button type="submit">Analyze</button>
+</form>
+</div>
+<script>
+function sync(){var m=document.querySelector('input[name=mode]:checked').value;
+document.querySelectorAll('[data-for]').forEach(function(e){e.style.display=e.dataset.for.split(' ').indexOf(m)>=0?'':'none';});}
+document.querySelectorAll('input[name=mode]').forEach(function(r){r.addEventListener('change',sync);});sync();
+</script>
+{% endblock %}

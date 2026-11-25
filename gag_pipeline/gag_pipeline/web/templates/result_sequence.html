@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Sequence scan – GAG–protein analysis{% endblock %}
+{% block body %}
+{% set s = d.seq %}
+<div class="card">
+<h1>{{ s.name }}</h1>
+<p class="mut">{{ s.length }} residues · numbered 1–{{ s.length }} · sequence-only scan (turn and geometric motifs need a 3-D structure; enter a PDB ID for those and for the 3-D view)</p>
+<p>Residues in a motif or cluster: {{ s.ranges or 'none' }}</p>
+</div>
+<div class="card"><h2>Sequence</h2>
+<p class="mut" style="font-size:13px"><span class="sw" style="background:var(--motif)"></span>inside a motif or cluster</p>
+<div class="seqrow">
+{% for i in range(0, s.residues|length, 10) %}<span class="blk"><span class="n">{{ s.residues[i].num }}</span><span class="r">{% for r in s.residues[i:i+10] %}<span class="res {{ r.cls }}" title="{{ r.aa }} {{ r.num }}">{{ r.aa }}</span>{% endfor %}</span></span>{% endfor %}
+</div></div>
+<div class="card"><h2>Motifs found ({{ s['items']|length }})</h2>
+{% for it in s['items'] %}<div class="mut" style="font-family:ui-monospace,Consolas,monospace;font-size:13px">{{ it.label }}</div>{% else %}<p class="mut">None.</p>{% endfor %}
+</div>
+{% include "_downloads.html" %}
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Consensus – GAG–protein analysis{% endblock %}
+{% block body %}
+<div class="card">
+<h1>Consensus across {{ d.n_structures }} structures</h1>
+<p class="mut">Cutoff {{ d.cutoff }} Å. Residues that touch the GAG in more than one structure of the same protein.</p>
+<table><tr><th>Structure</th><th>Protein</th><th>GAG sugars</th><th>Residues touching</th><th></th></tr>
+{% for m in d.members %}<tr><td><b>{{ m.pdb_id }}</b></td><td>{{ m.protein }}</td><td>{{ m.n_gag }}</td><td>{{ m.n_residues }}</td><td><a href="{{ url_for('result', job_id=m.job) }}">open 3-D view</a></td></tr>{% endfor %}
+</table>
+</div>
+<div class="card">
+<h2>Same protein in several structures</h2>
+{% for g in d.groups %}
+<h3 style="font-size:14px;margin:12px 0 4px">{{ g.label or 'Unnamed protein (no UniProt reference)' }} <span class="mut">· {{ g.structures|join(', ') }}</span></h3>
+{% if g.positions %}
+<table><tr><th>Residue</th><th>UniProt position</th><th>Numbering in each structure</th></tr>
+{% for p in g.positions %}<tr><td>{{ p.res_name }}</td><td>{{ p.uniprot_position if p.uniprot_position is not none else p.res_seq }}</td>
+<td>{% for sid, nums in p.numbering_by_structure.items() %}{{ sid }}: {{ nums|join(', ') }}{% if not loop.last %} &nbsp;·&nbsp; {% endif %}{% endfor %}</td></tr>{% endfor %}
+</table>
+<p class="mut" style="font-size:13px">{{ g.positions|length }} position(s) touch the GAG in every one of these structures.</p>
+{% else %}<p class="mut">No position touches the GAG in all of these structures.</p>{% endif %}
+{% else %}
+<p class="mut">No two of these structures contain the same protein (same UniProt entry), so only the residue-type counts below are available.</p>
+{% endfor %}
+</div>
+<div class="card">
+<h2>Residue types that touch the GAG</h2>
+<p class="mut" style="font-size:13px;margin-top:0">How many of the {{ d.n_structures }} structures have at least one interacting residue of each type.</p>
+<table><tr><th>Residue</th><th>Structures</th></tr>
+{% for t, n in d.types %}<tr><td>{{ t }}</td><td>{{ n }} of {{ d.n_structures }}</td></tr>{% endfor %}</table>
+</div>
+{% include "_downloads.html" %}
+{% endblock %}
